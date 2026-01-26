@@ -81,11 +81,10 @@ The goal of this project is to build a computer program that:
 
 ```bash
 
-git clone https://github.com/gangwargajendra/CS331-software-project.git
+git clone https://github.com/TusharKaushal100/Smart-Traffic-Signal-Automation-System.git
 
 
-cd smart-traffic-signal-system
+cd Smart-Traffic-Signal-Automation-System
 
 
-python main.py
-""
+"""
