@@ -86,5 +86,5 @@ git clone https://github.com/TusharKaushal100/Smart-Traffic-Signal-Automation-Sy
 
 cd Smart-Traffic-Signal-Automation-System
 
-
+--end
 """
