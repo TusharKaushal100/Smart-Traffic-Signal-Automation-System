@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
 });
 
 
-// ⭐ DIRECT connection string (temporary for testing)
+
 const MONGO_URI =
   "mongodb+srv://kartikkaushal666:HyS7SuWUWM8BGulu@cluster0.0741gaq.mongodb.net/traffic";
 
@@ -24,8 +24,3 @@ app.listen(PORT, () => {
 });
 
 
-// mongodb+srv://kartikkaushal666:<db_password>@cluster0.0741gaq.mongodb.net/
-
-// OLYdFf3HzHkKjjW3
-
-// mongodb+srv://<db_username>:<db_password>@cluster0.0741gaq.mongodb.net/
