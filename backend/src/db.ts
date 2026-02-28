@@ -19,3 +19,14 @@
 //       userId:mongoose.Types.ObjectId   // because it is compile time so it only accepts types so you have to write fully 
 //       upvote:mongoose.Types.ObjectId[]  // [mongoose.Types.ObjectId] this couldnt be done because it means tuple with only one element  
 // }
+
+// const userSchema = new Schema({
+//     username:{type:String,required:true,unique:true},
+//     name :{type:String,required:true},
+//     password:{type:String,required:true},
+//     email:{type:String,required:true,unique:true,lowercase:true},
+//     role:{type:String,enum:['student','faculty','ta'],default:'student'}
+
+//     },
+//     {timestamps:true}
+// )
