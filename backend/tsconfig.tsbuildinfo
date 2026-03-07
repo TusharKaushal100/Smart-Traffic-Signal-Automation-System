@@ -1,1 +1,1 @@
-{"root":["./src/config.ts","./src/db.ts","./src/index.ts","./src/middlewares/auth.ts","./src/routes/officer.ts","./src/routes/traffic.ts","./src/routes/violation.ts","./src/services/logic.ts","./src/services/mlservice.ts"],"errors":true,"version":"5.9.3"}
+{"root":["./src/config.ts","./src/db.ts","./src/index.ts","./src/middlewares/auth.ts","./src/middlewares/upload.ts","./src/routes/officer.ts","./src/routes/traffic.ts","./src/routes/user.ts","./src/routes/violation.ts","./src/services/logic.ts","./src/services/mlservice.ts","./src/services/scheduler.ts"],"version":"5.9.3"}

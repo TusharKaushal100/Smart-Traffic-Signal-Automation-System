@@ -1,38 +1,96 @@
 import express from "express"
-import {analyzeTraffic} from "../services/mlService.js"
-import {calculateDensity,calculateGreenTime} from "../services/logic.js"
-import {SignalModel} from "../db.js"
+import { analyzeTraffic } from "../services/mlService.js"
+import { calculateDensity, calculateGreenTime } from "../services/logic.js"
+import { runTrafficScheduler } from "../services/scheduler.js"
+import { IntersectionModel, SignalModel } from "../db.js"
+import { upload } from "../middlewares/upload.js"
 
 export const trafficRouter = express.Router()
 
+const traffic = async (req: any, res: any) => {
 
-trafficRouter.post("/analyze",async(req,res)=>{
+    const { intersectionId } = req.body
 
-    const {image,intersection} = req.body
+    const images = req.files as Express.Multer.File[]
 
-    const result = await analyzeTraffic(image)
+    const laneIds = Array.isArray(req.body.laneIds)
+        ? req.body.laneIds
+        : [req.body.laneIds]
 
-    const density = calculateDensity(result.vehicle_count)
+    if (!intersectionId || !images || !laneIds) {
+        return res.status(400).json({ message: "intersectionId, laneIds and images are required" })
+    }
 
-    const greenTime = calculateGreenTime(density)
+    try {
 
-    const log = new SignalModel({
+        const intersection = await IntersectionModel.findById(intersectionId)
 
-        intersection,
-        density,
-        vehicleCount:result.vehicle_count,
-        greenTime
+        if (!intersection) {
+            return res.status(404).json({ message: "Intersection not found" })
+        }
 
-    })
+        let totalVehicles = 0
 
-    await log.save()
+        const laneResults: any[] = []
 
-    res.json({
+        for (let i = 0; i < images.length; i++) {
 
-        vehicleCount:result.vehicle_count,
-        density,
-        greenTime
+            const file = images[i]
 
-    })
+            const laneId = laneIds[i]
 
-})
+            if (!file) continue
+
+            const result = await analyzeTraffic(file.buffer)
+
+            const vehicleCount = result.vehicle_count
+
+            const density = calculateDensity(vehicleCount)
+
+            const greenTime = calculateGreenTime(density)
+
+            totalVehicles += vehicleCount
+
+            const signal = intersection.signals.find((s: any) => s.laneId === laneId)
+
+            if (signal) {
+                signal.vehicleCount = vehicleCount
+                signal.density = density
+                signal.greenTime = greenTime
+                signal.remainingTime = greenTime
+            }
+
+            laneResults.push({
+                laneId,
+                vehicleCount,
+                density,
+                greenTime
+            })
+        }
+
+        await intersection.save()
+
+        await runTrafficScheduler(intersectionId)
+
+        const log = await SignalModel.create({
+            intersectionId,
+            density: calculateDensity(totalVehicles),
+            vehicleCount: totalVehicles,
+            greenTime: Math.max(...laneResults.map(l => l.greenTime))
+        })
+
+        return res.json({
+            message: "Traffic analyzed successfully",
+            intersectionId,
+            lanes: laneResults,
+            totalVehicles,
+            log
+        })
+
+    } catch (err) {
+
+        return res.status(500).json({ message: "Server error" })
+    }
+}
+
+trafficRouter.post("/analyze", upload.array("images"), traffic)
