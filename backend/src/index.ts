@@ -1,26 +1,61 @@
-import express from "express";
-import cors from "cors";
-import mongoose from "mongoose";
+import express from "express"
+import cors from "cors"
+import mongoose from "mongoose"
+import dotenv from "dotenv"
 
-const app = express();
-const PORT = 5000;
+import { officerRouter } from "./routes/officer.js"
+import { trafficRouter } from "./routes/traffic.js"
+import { violationRouter } from "./routes/violation.js"
 
-app.use(cors());
-app.use(express.json());
+dotenv.config()
 
-app.get("/", (req, res) => {
-  res.send("API running");
-});
+const app = express()
 
+app.use(cors())
+app.use(express.json())
 
-
-const MONGO_URI =
-  "mongodb+srv://kartikkaushal666:HyS7SuWUWM8BGulu@cluster0.0741gaq.mongodb.net/traffic";
-
-mongoose.connect(MONGO_URI)
-  
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 5000
 
 
+app.get("/",(req,res)=>{
+    res.send("Traffic Backend Running")
+})
+
+
+app.use("/api/v1/officer",officerRouter)
+app.use("/api/v1/traffic",trafficRouter)
+app.use("/api/v1/violation",violationRouter)
+
+
+
+const main = async()=>{
+
+    try{
+
+        await mongoose.connect(process.env.MONGO_URL as string)
+
+        console.log("MongoDB connected")
+
+    }
+    catch(err){
+
+        console.log("MongoDB connection failed")
+
+    }
+
+    try{
+
+        app.listen(PORT,()=>{
+            console.log("Server running on "+PORT)
+        })
+
+    }
+    catch(err){
+
+        console.log("Server failed")
+
+    }
+
+}
+
+main()
