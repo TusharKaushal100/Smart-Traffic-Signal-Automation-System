@@ -13,9 +13,7 @@ const traffic = async (req: any, res: any) => {
 
     const images = req.files as Express.Multer.File[]
 
-    const laneIds = Array.isArray(req.body.laneIds)
-        ? req.body.laneIds
-        : [req.body.laneIds]
+    const laneIds = req.body.laneIds as string[]
 
     if (!intersectionId || !images || !laneIds) {
         return res.status(400).json({ message: "intersectionId, laneIds and images are required" })

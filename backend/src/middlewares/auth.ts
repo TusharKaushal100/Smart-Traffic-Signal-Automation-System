@@ -12,6 +12,8 @@ interface jwtPayload{
 
 export const auth = (req:AuthRequest,res:Response,next:NextFunction)=>{
 
+    console.log("inside auth middleware")
+
     const token = req.headers.authorization
 
     if(!token){
