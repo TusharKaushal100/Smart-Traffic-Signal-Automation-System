@@ -2,10 +2,12 @@ import express from "express"
 import cors from "cors"
 import mongoose from "mongoose"
 import dotenv from "dotenv"
+import { updateSignalTimers } from "./services/scheduler.js"
 
 import { officerRouter } from "./routes/officer.js"
 import { trafficRouter } from "./routes/traffic.js"
 import { violationRouter } from "./routes/violation.js"
+import { IntersectionModel } from "./db.js"
 
 dotenv.config()
 
@@ -36,6 +38,20 @@ const main = async()=>{
 
         console.log("MongoDB connected")
 
+        setInterval(async () => {
+
+             console.log("updating signal timers")
+
+             const intersections = await IntersectionModel.find()
+
+            for (let i = 0; i < intersections.length; i++) {
+
+                    await updateSignalTimers(intersections[i]!._id.toString())
+
+            }
+
+             },1000)
+
     }
     catch(err){
 
@@ -55,6 +71,8 @@ const main = async()=>{
         console.log("Server failed")
 
     }
+
+    
 
 }
 

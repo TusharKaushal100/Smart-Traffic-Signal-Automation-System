@@ -1,11 +1,23 @@
 import axios from "axios"
-import {ML_API} from "../config.js"
+import FormData from "form-data"
+import { ML_API } from "../config.js"
 
-export const analyzeTraffic = async(image:string)=>{
+export const analyzeTraffic = async (imageBuffer: Buffer) => {
 
-    const response = await axios.post(`${ML_API}/analyze`,{
-        image
+    const form = new FormData()
+
+    form.append("file", imageBuffer, {
+        filename: "lane.jpg",
+        contentType: "image/jpeg"
     })
+
+    const response = await axios.post(
+        `${ML_API}/analyze`,
+        form,
+        {
+            headers: form.getHeaders()
+        }
+    )
 
     return response.data
 }

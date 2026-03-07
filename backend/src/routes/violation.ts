@@ -1,24 +1,43 @@
 import express from "express"
-import {ViolationModel} from "../db.js"
+import { ViolationModel } from "../db.js"
 
 export const violationRouter = express.Router()
 
 
-violationRouter.post("/store",async(req,res)=>{
+violationRouter.post("/store", async (req, res) => {
 
-    const violation = new ViolationModel(req.body)
+    try {
 
-    await violation.save()
+        const violation = await ViolationModel.create(req.body)
 
-    res.json({message:"Violation stored"})
+        res.json({
+            message: "Violation stored",
+            violation
+        })
+
+    } catch (err) {
+
+        console.error(err)
+        res.status(500).json({ message: "Failed to store violation" })
+
+    }
 
 })
 
 
-violationRouter.get("/all",async(req,res)=>{
+violationRouter.get("/all", async (req, res) => {
 
-    const data = await ViolationModel.find()
+    try {
 
-    res.json(data)
+        const data = await ViolationModel.find()
+
+        res.json(data)
+
+    } catch (err) {
+
+        console.error(err)
+        res.status(500).json({ message: "Failed to fetch violations" })
+
+    }
 
 })
