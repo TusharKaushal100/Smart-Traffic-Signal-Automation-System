@@ -5,7 +5,7 @@ import { auth} from "../middlewares/auth.js"
 import type { AuthRequest } from "../middlewares/auth.js"
 import { IntersectionModel } from "../db.js"
 
-export const officerRouter = express.Router()
+export const overrideRouter = express.Router()
 
 
 
@@ -13,12 +13,12 @@ const handleOverride = async (req:AuthRequest,res:Response)=>{
 
     console.log("inside manual override")
 
-    const {intersectionId,laneId,state} = req.body
+    const {intersectionId,laneId,state,time} = req.body
 
 
-    if(!intersectionId || !laneId || !state){
+    if(!intersectionId || !laneId || !state || !time){
 
-        return res.status(400).json({message:"intersectionId, laneId and state are required"})
+        return res.status(400).json({message:"intersectionId, laneId and state,time are required"})
     }
 
     const validStates = ["RED","GREEN","YELLOW"]
@@ -47,6 +47,7 @@ const handleOverride = async (req:AuthRequest,res:Response)=>{
 
 
         signal.currentState = state
+        signal.remainingTime = time
 
         await intersection.save()
 
@@ -73,4 +74,4 @@ const handleOverride = async (req:AuthRequest,res:Response)=>{
 
 
 //@ts-ignore
-officerRouter.put("/override",auth,handleOverride)
+overrideRouter.put("/override",auth,handleOverride)

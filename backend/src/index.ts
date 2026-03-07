@@ -4,10 +4,12 @@ import mongoose from "mongoose"
 import dotenv from "dotenv"
 import { updateSignalTimers } from "./services/scheduler.js"
 
-import { officerRouter } from "./routes/officer.js"
+import { officerRouter } from "./routes/user.js"
+import {overrideRouter} from "./routes/officer.js"
 import { trafficRouter } from "./routes/traffic.js"
 import { violationRouter } from "./routes/violation.js"
 import { IntersectionModel } from "./db.js"
+import { intersectionRouter } from "./routes/intersection.js"
 
 dotenv.config()
 
@@ -27,6 +29,11 @@ app.get("/",(req,res)=>{
 app.use("/api/v1/officer",officerRouter)
 app.use("/api/v1/traffic",trafficRouter)
 app.use("/api/v1/violation",violationRouter)
+app.use("/api/v1/intersection", intersectionRouter)
+app.use("/api/v1/override", overrideRouter)
+app.use("/uploads",express.static("uploads"))
+app.use("/images",express.static("images"))
+// app.use("/api/v1/user",)
 
 
 
@@ -40,7 +47,7 @@ const main = async()=>{
 
         setInterval(async () => {
 
-             console.log("updating signal timers")
+            //  console.log("updating signal timers")
 
              const intersections = await IntersectionModel.find()
 
