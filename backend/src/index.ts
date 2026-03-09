@@ -10,6 +10,9 @@ import { trafficRouter } from "./routes/traffic.js"
 import { violationRouter } from "./routes/violation.js"
 import { IntersectionModel } from "./db.js"
 import { intersectionRouter } from "./routes/intersection.js"
+import { startWebSocket } from "./ws.js"
+
+
 
 dotenv.config()
 
@@ -44,6 +47,8 @@ const main = async()=>{
         await mongoose.connect(process.env.MONGO_URL as string)
 
         console.log("MongoDB connected")
+
+        startWebSocket()
 
         setInterval(async () => {
 

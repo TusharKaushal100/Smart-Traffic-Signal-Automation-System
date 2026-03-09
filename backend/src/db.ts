@@ -108,7 +108,13 @@ const signalSchema = new Schema({
     remainingTime:{
         type:Number,
         default:0
-    }
+    },
+
+    manualOverride:{
+    type:Boolean,
+    default:false
+  }
+
 
 })
 

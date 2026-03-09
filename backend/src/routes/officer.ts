@@ -1,13 +1,11 @@
 import express from "express"
 import type { Response } from "express"
 
-import { auth} from "../middlewares/auth.js"
+import { auth } from "../middlewares/auth.js"
 import type { AuthRequest } from "../middlewares/auth.js"
 import { IntersectionModel } from "../db.js"
 
 export const overrideRouter = express.Router()
-
-
 
 const handleOverride = async (req:AuthRequest,res:Response)=>{
 
@@ -15,42 +13,42 @@ const handleOverride = async (req:AuthRequest,res:Response)=>{
 
     const {intersectionId,laneId,state,time} = req.body
 
-
     if(!intersectionId || !laneId || !state || !time){
 
-        return res.status(400).json({message:"intersectionId, laneId and state,time are required"})
+        return res.status(400).json({
+            message:"intersectionId, laneId, state and time required"
+        })
     }
 
     const validStates = ["RED","GREEN","YELLOW"]
 
-     if(!validStates.includes(state)){
-        return res.status(400).json({message:"Invalid signal state"})
-     }
-
+    if(!validStates.includes(state)){
+        return res.status(400).json({
+            message:"Invalid signal state"
+        })
+    }
 
     try{
 
         const intersection = await IntersectionModel.findById(intersectionId)
 
         if(!intersection){
-
             return res.status(404).json({message:"Intersection not found"})
         }
-
 
         const signal = intersection.signals.find(s => s.laneId === laneId)
 
         if(!signal){
-
             return res.status(404).json({message:"Signal not found"})
         }
-
 
         signal.currentState = state
         signal.remainingTime = time
 
-        await intersection.save()
+        //@ts-ignore
+        signal.manualOverride = true
 
+        await intersection.save()
 
         return res.json({
 
@@ -64,14 +62,12 @@ const handleOverride = async (req:AuthRequest,res:Response)=>{
     }
     catch(err){
 
-        console.log("error in manual override")
+        console.log("override error")
 
         return res.status(500).json({message:"Server error"})
     }
 
 }
-
-
 
 //@ts-ignore
 overrideRouter.put("/override",auth,handleOverride)
