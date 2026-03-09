@@ -15,7 +15,7 @@ const traffic = async (req: any, res: any) => {
 
     const laneIds = req.body.laneIds as string[]
 
-    if (!intersectionId || !images || !laneIds) {
+    if (!intersectionId || !laneIds) {
         return res.status(400).json({ message: "intersectionId, laneIds and images are required" })
     }
 
