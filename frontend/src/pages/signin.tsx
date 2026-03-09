@@ -4,6 +4,7 @@ import { Button } from "../components/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import React from "react";
+import axios from "axios";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export const Login = () => {
@@ -23,10 +24,6 @@ export const Login = () => {
       setError({});
       setGeneralError(null);
 
-      // ⭐ fake API delay
-      await new Promise((res) => setTimeout(res, 500));
-
-      // ⭐ simple validation
       if (!username) {
         setError({ username: ["Username is required"] });
         return;
@@ -37,16 +34,27 @@ export const Login = () => {
         return;
       }
 
-      // ⭐ pretend backend success
-      const fakeToken = "demo-token-123";
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/officer/login",
+        {
+          username,
+          password
+        }
+      );
 
-      console.log(`token from login=${fakeToken}`);
+      const token = response.data.token;
 
-      localStorage.setItem("token", fakeToken);
+      console.log(`token from login=${token}`);
 
-      navigate("/myQuestions");
-    } catch (err) {
-      setGeneralError("Login failed");
+      localStorage.setItem("token", token);
+
+      navigate("/dashboard");
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        setGeneralError(err.response.data.message);
+      } else {
+        setGeneralError("Login failed");
+      }
     }
   };
 
@@ -54,14 +62,14 @@ export const Login = () => {
     <div>
       <div className="h-screen grid grid-cols-2">
         <div className="flex items-center justify-center h-full w-full cols-span-1 bg-slate-900">
-          <div className="w-150 h-150">
-            <DotLottieReact src="/animations/Bunny.lottie" loop autoplay />
+          <div className="w-200 h-200">
+            <DotLottieReact src="/animations/Police.lottie" loop autoplay />
           </div>
         </div>
 
         <div className="flex justify-center items-center cols-span-1 bg-slate-900 ">
           <div className="w-120 h-100 p-5 border-slate-400 shadow-lg bg-white rounded-lg transition-transform duration-300 ease-out hover:scale-[1.03]">
-            <div className="flex justify-center p-5">
+            <div className="flex justify-center p-3">
               <h1 className="text-3xl">Traffic Security</h1>
             </div>
 
@@ -81,7 +89,7 @@ export const Login = () => {
             <Input
               defaultStyle={"w-full "}
               ref={passwordRef}
-              placeholder="Set Password"
+              placeholder="Password"
             />
             {error.password && (
               <p className="text-red-500 text-sm p-1">{error.password[0]}</p>
@@ -92,9 +100,7 @@ export const Login = () => {
               variant={"primary"}
               size={"md"}
               className="w-full mt-8 m-2 bg-green"
-              onClick={() => {
-                handleLogin();
-              }}
+              onClick={handleLogin}
             />
           </div>
         </div>

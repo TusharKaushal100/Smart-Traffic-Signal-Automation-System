@@ -6,7 +6,7 @@ import { SidebarItem } from "./sidebar-item"
 import { Question } from "../icons/question"
 import { Bars } from "../icons/sidebar"
 
-const defaultStyle = "h-screen  bg-red shadow-lg border-slate-300"
+const defaultStyle = "h-screen  bg-white shadow-lg border-slate-300"
 
 export const SideBar = ()=>{
        
