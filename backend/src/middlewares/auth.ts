@@ -13,19 +13,22 @@ interface jwtPayload{
 export const auth = (req:AuthRequest,res:Response,next:NextFunction)=>{
 
     console.log("inside auth middleware")
-
-    const token = req.headers.authorization
-
-    if(!token){
-        return res.status(401).json({message:"Unauthorized"})
-    }
+   
+    
+    
 
     try{
+        const token = req.headers.authorization?.split(" ")[1]
+
+        if(!token){ 
+            return res.status(401).json({message:"Token error"})
+        }    
 
         const decoded = jwt.verify(token as string,Secret) as jwtPayload
 
         req.userid = decoded.id
-
+        
+        console.log("succesfully Authenticated user id:",req.userid)
         next()
 
     }
