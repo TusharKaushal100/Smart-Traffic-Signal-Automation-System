@@ -111,7 +111,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
     // Validate: har lane mein kam se kam photo1 honi chahiye
     const hasAnyPhoto = intersection.signals.some((s: any) => lanePhotos[s.laneId]?.photo1)
     if (!hasAnyPhoto) {
-      setAnalyzeError("Kam se kam ek lane ki Photo 1 select karo")
+      setAnalyzeError("choose atleast 1 Photo ")
       return
     }
 
@@ -186,11 +186,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
       {/* Upload Section */}
       <div className="mt-8 bg-slate-50 border border-slate-200 rounded-2xl p-6">
 
-        <h3 className="text-lg font-semibold mb-1 text-slate-800">🚦 Traffic Analyze Karo</h3>
-        <p className="text-sm text-slate-500 mb-5">
-          Har lane ke liye <span className="font-semibold text-slate-700">2 photos</span> upload karo —
-          Photo 1 abhi analyze hogi, Photo 2 <span className="font-semibold text-blue-600">10 seconds baad</span> automatically analyze hogi
-        </p>
+        <h3 className="text-lg font-semibold mb-1 text-slate-800">🚦 Traffic Analyze</h3>
 
         {/* Lane Cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -213,7 +209,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
                 <div className="mb-3">
                   <div className="flex items-center gap-1 mb-1">
                     <span className="text-xs font-semibold text-slate-600">📸 Photo 1</span>
-                    <span className="text-xs text-slate-400">(abhi)</span>
+                    <span className="text-xs text-slate-400">(Now)</span>
                   </div>
                   {photos.photo1 ? (
                     <div className="relative">
@@ -229,7 +225,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
                   ) : (
                     <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition">
                       <span className="text-xl">📷</span>
-                      <span className="text-xs text-slate-400">Choose karo</span>
+                      <span className="text-xs text-slate-400">Choose Photo</span>
                       <input type="file" accept="image/jpeg,image/png" className="hidden"
                         onChange={(e) => handlePhotoChange(signal.laneId, 1, e.target.files?.[0] ?? null)} />
                     </label>
@@ -240,7 +236,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
                 <div>
                   <div className="flex items-center gap-1 mb-1">
                     <span className="text-xs font-semibold text-slate-600">📸 Photo 2</span>
-                    <span className="text-xs text-slate-400">(10s baad)</span>
+                    <span className="text-xs text-slate-400">(After 10s)</span>
                   </div>
                   {photos.photo2 ? (
                     <div className="relative">
@@ -256,7 +252,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
                   ) : (
                     <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-blue-200 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition">
                       <span className="text-xl">📷</span>
-                      <span className="text-xs text-slate-400">Choose karo</span>
+                      <span className="text-xs text-slate-400">Choose Photo</span>
                       <input type="file" accept="image/jpeg,image/png" className="hidden"
                         onChange={(e) => handlePhotoChange(signal.laneId, 2, e.target.files?.[0] ?? null)} />
                     </label>
@@ -275,13 +271,13 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
         {analyzing && (
           <div className="mt-5 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            {currentRound === 1 && <span className="text-blue-700 font-medium">⏳ Round 1 — Photo 1 analyze ho rahi hai...</span>}
+            {currentRound === 1 && <span className="text-blue-700 font-medium">⏳ Round 1 — Photo 1 analyzing</span>}
             {countdown !== null && (
               <span className="text-blue-700 font-medium">
-                ⏱ Photo 2 analyze hogi <span className="text-2xl font-black">{countdown}</span> seconds mein...
+                ⏱ Photo 2 will analyze After <span className="text-2xl font-black">{countdown}</span> seconds ....
               </span>
             )}
-            {currentRound === 2 && <span className="text-blue-700 font-medium">⏳ Round 2 — Photo 2 analyze ho rahi hai...</span>}
+            {currentRound === 2 && <span className="text-blue-700 font-medium">⏳ Round 2 — Photo 2 analyzing...</span>}
           </div>
         )}
 
@@ -304,7 +300,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
           <div className="mt-5 bg-green-50 border border-green-200 rounded-xl p-4">
             <h4 className="font-semibold text-green-800 mb-3">
               ✅ Round {analyzeResult.round} Analysis Complete!
-              {analyzeResult.round === 1 && <span className="text-sm font-normal text-slate-500 ml-2">(Photo 2 upload ki hai toh 10s mein automatically analyze hogi)</span>}
+              {analyzeResult.round === 1 && <span className="text-sm font-normal text-slate-500 ml-2">(Photo 2 will automatically analyze after 10 seconds)</span>}
             </h4>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {analyzeResult.data?.lanes?.map((lane: any) => (
