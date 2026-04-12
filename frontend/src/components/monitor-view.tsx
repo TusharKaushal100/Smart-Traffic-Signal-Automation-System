@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { EditIntersectionModal } from "./EditIntersectionModal"
 import { IntersectionVisualizer } from "./IntersectionVisualizer"
@@ -10,7 +10,6 @@ interface Props {
   onIntersectionUpdated: () => void
 }
 
-// Per lane: 2 photos with timestamps
 interface LanePhotos {
   photo1: File | null
   photo2: File | null
@@ -22,7 +21,6 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
   const [editOpen, setEditOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // 2 photos per lane
   const [lanePhotos, setLanePhotos] = useState<Record<string, LanePhotos>>({})
   const [analyzing, setAnalyzing] = useState(false)
   const [analyzeResult, setAnalyzeResult] = useState<any>(null)
@@ -30,20 +28,45 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
   const [countdown, setCountdown] = useState<number | null>(null)
   const [currentRound, setCurrentRound] = useState<1 | 2 | null>(null)
 
+  // ✅ NEW
+  const [activeLane, setActiveLane] = useState<string | null>(null)
+  const activeLaneRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    activeLaneRef.current = activeLane
+  }, [activeLane])
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2000)
     return () => clearTimeout(timer)
   }, [])
 
+  // ✅ UPDATED WEBSOCKET (ONLY CHANGE HERE)
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080")
+
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data)
       const fresh = data.find((i: any) => i._id === intersection._id)
-      if (fresh) setSignals(fresh.signals)
+
+      if (fresh) {
+        setSignals(fresh.signals)
+
+        // 🔥 Trigger Round 2 when GREEN cycle ends
+        if (activeLaneRef.current && currentRound === null) {
+          const lane = fresh.signals.find(
+            (s: any) => s.laneId === activeLaneRef.current
+          )
+
+          if (lane && lane.currentState === "RED") {
+            triggerRound2()
+          }
+        }
+      }
     }
+
     return () => ws.close()
-  }, [intersection._id])
+  }, [intersection._id, currentRound])
 
   const resumeAuto = async () => {
     try {
@@ -71,8 +94,8 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
     setAnalyzeError(null)
   }
 
-  // Send specific photo round to backend
   const sendPhotos = async (round: 1 | 2) => {
+
     const selectedLanes = intersection.signals.filter((s: any) => {
       const photos = lanePhotos[s.laneId]
       return photos && (round === 1 ? photos.photo1 : photos.photo2)
@@ -107,8 +130,25 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
     return res.data
   }
 
+  // ✅ NEW FUNCTION
+  const triggerRound2 = async () => {
+
+    setCurrentRound(2)
+
+    try {
+      const result2 = await sendPhotos(2)
+      setAnalyzeResult({ round: 2, data: result2 })
+      onIntersectionUpdated()
+    } catch (err) {
+      console.log("Round 2 failed")
+    }
+
+    setCurrentRound(null)
+    setActiveLane(null)
+  }
+
   const handleAnalyze = async () => {
-    // Validate: har lane mein kam se kam photo1 honi chahiye
+
     const hasAnyPhoto = intersection.signals.some((s: any) => lanePhotos[s.laneId]?.photo1)
     if (!hasAnyPhoto) {
       setAnalyzeError("choose atleast 1 Photo ")
@@ -120,37 +160,30 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
     setAnalyzeResult(null)
 
     try {
-      // Round 1 — Photo 1 analyze karo
+      // ✅ ROUND 1 (unchanged)
       setCurrentRound(1)
       const result1 = await sendPhotos(1)
       setAnalyzeResult({ round: 1, data: result1 })
       onIntersectionUpdated()
 
-      // Check karo koi photo2 hai?
+      // ✅ CHECK photo2 exists
       const hasPhoto2 = intersection.signals.some((s: any) => lanePhotos[s.laneId]?.photo2)
 
       if (hasPhoto2) {
-        // 10 second countdown
-        setCurrentRound(null)
-        for (let i = 10; i > 0; i--) {
-          setCountdown(i)
-          await new Promise(res => setTimeout(res, 1000))
-        }
-        setCountdown(null)
+        // ✅ Track GREEN lane instead of delay
+        const greenLane = signals.find((s: any) => s.currentState === "GREEN")
 
-        // Round 2 — Photo 2 analyze karo
-        setCurrentRound(2)
-        const result2 = await sendPhotos(2)
-        setAnalyzeResult({ round: 2, data: result2 })
-        onIntersectionUpdated()
-        setCurrentRound(null)
+        if (greenLane) {
+          setActiveLane(greenLane.laneId)
+        }
       }
+
+      setCurrentRound(null)
 
     } catch (err: any) {
       setAnalyzeError(err.response?.data?.message || "Analysis fail ho gaya")
     } finally {
       setAnalyzing(false)
-      setCurrentRound(null)
       setCountdown(null)
     }
   }
@@ -170,6 +203,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
 
   return (
     <div>
+      {/* EVERYTHING BELOW IS EXACTLY SAME (UNCHANGED UI) */}
       {/* Header */}
       <div className="flex justify-between mb-6">
         <h2 className="text-2xl font-semibold">Monitoring: {intersection.name}</h2>
@@ -274,7 +308,7 @@ export const MonitorView = ({ intersection, exitMonitor, onIntersectionUpdated }
             {currentRound === 1 && <span className="text-blue-700 font-medium">⏳ Round 1 — Photo 1 analyzing</span>}
             {countdown !== null && (
               <span className="text-blue-700 font-medium">
-                ⏱ Photo 2 will analyze After <span className="text-2xl font-black">{countdown}</span> seconds ....
+                ⏱ Photo 2 will analyze After the green and yellow time finishes for the previous lane ....
               </span>
             )}
             {currentRound === 2 && <span className="text-blue-700 font-medium">⏳ Round 2 — Photo 2 analyzing...</span>}

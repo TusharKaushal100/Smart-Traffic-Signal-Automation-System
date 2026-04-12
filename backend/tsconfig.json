@@ -6,7 +6,12 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
+    "esModuleInterop": true,
+     
+    "moduleResolution": "NodeNext",
     "module": "nodenext",
+//     "module": "commonjs",
+// "moduleResolution": "node",
     "target": "esnext",
     "types": ["node"],
     "rootDir": "./src",
