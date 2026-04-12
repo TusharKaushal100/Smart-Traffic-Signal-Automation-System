@@ -74,7 +74,7 @@ def build_dataset(
         if not os.path.exists(xml_file):
             print(f"  [SKIP] No annotation for {seq_name}")
             continue
-
+    
         frame_counts = parse_detrac_xml(xml_file)
 
         if not frame_counts:

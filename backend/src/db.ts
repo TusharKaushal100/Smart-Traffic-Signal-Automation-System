@@ -29,6 +29,8 @@ export interface Signal{
     greenTime:number
     yellowTime:number
     remainingTime:number
+    manualOverride:boolean
+    waitingTime:number
 }
 export interface Intersection{
     name:string
@@ -71,7 +73,6 @@ const signalLogSchema = new Schema<SignalLog>({
 },{timestamps:true})
 
 
-
 const signalSchema = new Schema({
 
     laneId:{type:String,required:true},
@@ -111,14 +112,17 @@ const signalSchema = new Schema({
     },
 
     manualOverride:{
-    type:Boolean,
-    default:false
-  }
+        type:Boolean,
+        default:false
+    },
 
+    //NEW FIELD 
+    waitingTime:{
+        type:Number,
+        default:0
+    }
 
 })
-
-
 
 const intersectionSchema = new Schema<Intersection>({
 

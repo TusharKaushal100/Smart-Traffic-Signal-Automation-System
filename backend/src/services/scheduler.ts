@@ -10,25 +10,38 @@ export const runTrafficScheduler = async (intersectionId: string) => {
   let selectedLane: any = null
 
   for (const signal of intersection.signals) {
+
     //@ts-ignore
     if (signal.manualOverride) continue
 
+    const currentPriority = signal.vehicleCount + (signal.waitingTime || 0)
+
     if (!selectedLane) {
       selectedLane = signal
-    } else if (signal.vehicleCount > selectedLane.vehicleCount) {
-      selectedLane = signal
+    } else {
+      const selectedPriority =
+        selectedLane.vehicleCount + (selectedLane.waitingTime || 0)
+
+      if (currentPriority > selectedPriority) {
+        selectedLane = signal
+      }
     }
   }
 
   if (!selectedLane) return
 
   for (const signal of intersection.signals) {
+
     //@ts-ignore
     if (signal.manualOverride) continue
 
     if (signal.laneId === selectedLane.laneId) {
       signal.currentState = "GREEN"
       signal.remainingTime = signal.greenTime
+
+      // ✅ reset waiting time (it got served)
+      signal.waitingTime = 0
+
     } else {
       signal.currentState = "RED"
       signal.remainingTime = 0
@@ -37,7 +50,6 @@ export const runTrafficScheduler = async (intersectionId: string) => {
 
   await intersection.save()
 }
-
 
 export const updateSignalTimers = async (intersectionId: string) => {
 
