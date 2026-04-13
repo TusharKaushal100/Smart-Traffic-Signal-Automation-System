@@ -1,6 +1,6 @@
 """
 main.py — FastAPI ML server
-Uses Custom CNN if trained, else falls back to YOLOv8
+Uses Custom CNN for vehicle count
 """
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
