@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeAll, afterAll, afterEach, jest } from "@jest/globals"
+import { calculateDensity, calculateGreenTime } from "../services/logic.js"
 import mongoose from "mongoose"
 import { runTrafficScheduler, updateSignalTimers } from "../services/scheduler.js"
 import { IntersectionModel } from "../db.js"
@@ -155,6 +156,91 @@ describe("Module 4: ML Integration (Real)", () => {
     expect(typeof result.vehicle_count).toBe("number")
     expect(result.vehicle_count).toBeGreaterThanOrEqual(0)
 
+  })
+
+})
+
+
+describe("Module 5: ML Traffic Density Test Cases (TC-ML-001 to TC-ML-008)", () => {
+
+  // TC-ML-001: Low traffic — count < 10 → density LOW, greenTime 15
+  test("TC-ML-001: Low traffic image (3 vehicles) → density LOW, greenTime 15", () => {
+    const vehicleCount = -3
+    const density = calculateDensity(vehicleCount)
+    const greenTime = calculateGreenTime(density)
+
+    expect(density).toBe("LOW")
+    expect(greenTime).toBe(15)
+  })
+
+  // TC-ML-002: Medium traffic — 10 ≤ count < 20 → density MEDIUM, greenTime 30
+  test("TC-ML-002: Medium traffic image (15 vehicles) → density MEDIUM, greenTime 30", () => {
+    const vehicleCount = 15
+    const density = calculateDensity(vehicleCount)
+    const greenTime = calculateGreenTime(density)
+
+    expect(density).toBe("MEDIUM")
+    expect(greenTime).toBe(30)
+  })
+
+  // TC-ML-003: High traffic — count ≥ 20 → density HIGH, greenTime 50
+  test("TC-ML-003: High traffic image (25 vehicles) → density HIGH, greenTime 50", () => {
+    const vehicleCount = 25
+    const density = calculateDensity(vehicleCount)
+    const greenTime = calculateGreenTime(density)
+
+    expect(density).toBe("HIGH")
+    expect(greenTime).toBe(50)
+  })
+
+  // TC-ML-004: Empty road — 0 vehicles → density LOW, greenTime 15
+  test("TC-ML-004: Empty road (0 vehicles) → density LOW, greenTime 15", () => {
+    const vehicleCount = 0
+    const density = calculateDensity(vehicleCount)
+    const greenTime = calculateGreenTime(density)
+
+    expect(density).toBe("LOW")
+    expect(greenTime).toBe(15)
+  })
+
+  // TC-ML-005: Boundary — exactly 10 vehicles → density MEDIUM (since count < 10 is LOW)
+  test("TC-ML-005: Boundary — exactly 10 vehicles → density MEDIUM, greenTime 30", () => {
+    const vehicleCount = 10
+    const density = calculateDensity(vehicleCount)
+    const greenTime = calculateGreenTime(density)
+
+    expect(density).toBe("MEDIUM")
+    expect(greenTime).toBe(30)
+  })
+
+  // TC-ML-006: Boundary — exactly 20 vehicles → density HIGH (since count < 20 is MEDIUM)
+  test("TC-ML-006: Boundary — exactly 20 vehicles → density HIGH, greenTime 50", () => {
+    const vehicleCount = 20
+    const density = calculateDensity(vehicleCount)
+    const greenTime = calculateGreenTime(density)
+
+    expect(density).toBe("HIGH")
+    expect(greenTime).toBe(50)
+  })
+
+  // TC-ML-007: Upper boundary of LOW — 9 vehicles should still be LOW
+  test("TC-ML-007: Upper boundary of LOW — 9 vehicles → density LOW, greenTime 15", () => {
+    const vehicleCount = 9
+    const density = calculateDensity(vehicleCount)
+    const greenTime = calculateGreenTime(density)
+
+    expect(density).toBe("LOW")
+    expect(greenTime).toBe(15)
+  })
+
+  // TC-ML-008: Upper boundary of MEDIUM — 19 vehicles should still be MEDIUM
+  test("TC-ML-008: Upper boundary of MEDIUM — 19 vehicles → density MEDIUM, greenTime 30", () => {
+    const vehicleCount = 19
+    const density = calculateDensity(vehicleCount)
+    const greenTime = calculateGreenTime(density)
+
+    expect(density).toBe("MEDIUM")
+    expect(greenTime).toBe(30)
   })
 
 })

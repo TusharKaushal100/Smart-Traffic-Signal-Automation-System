@@ -1,6 +1,6 @@
 export const calculateDensity = (count:number)=>{
-
-    if(count < 10) return "LOW"
+    count = Math.max(0, count);
+    if(count >=0 && count < 10) return "LOW"
 
     if(count < 20) return "MEDIUM"
 
